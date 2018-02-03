@@ -88,25 +88,7 @@ int main (int argc, const char** argv) {
       }
     }
 
-    if (!comment && !if_line && prev_char == 't' && cur_char == 'h'
-      && next_char == 'e') {
-        //advance to confirm it is a then
-        char temp_prev = cur_char;
-        char temp_cur = next_char;
-        char temp_next = c;
-        char temp_c = fgetc(infile);
-        temp_prev = temp_cur;
-        temp_cur = temp_next;
-        temp_next = temp_c;
-        //temp_c = fgetc(infile);
-        if (temp_cur == 'n' && temp_next == ' ') {
-          //else_line = true;
-          print_error((char*) "Then should be on previous lin", 'e',
-            (char_counter - 1),line_counter);
-          }
-        }
-        ungetc(temp_c, infile);
-    }
+
 
     // this is an if with high likelihood
     if (!else_line && !comment && prev_char == 'i' && cur_char == 'f'
@@ -131,6 +113,24 @@ int main (int argc, const char** argv) {
             print_error((char*) "Mis-aligned els", 'e', (char_counter - 1),
             line_counter);
           }
+        }
+        ungetc(temp_c, infile);
+    }
+    if (!comment && !if_line && !else_line && prev_char == 't'
+      && cur_char == 'h' && next_char == 'e') {
+        //advance to confirm it is a then
+        char temp_prev = cur_char;
+        char temp_cur = next_char;
+        char temp_next = c;
+        char temp_c = fgetc(infile);
+        temp_prev = temp_cur;
+        temp_cur = temp_next;
+        temp_next = temp_c;
+        //temp_c = fgetc(infile);
+        if (temp_cur == 'n' && temp_next == ' ') {
+          //else_line = true;
+          print_error((char*) "Then should be on previous lin", 'e',
+            (char_counter - 1),line_counter);
         }
         ungetc(temp_c, infile);
     }
