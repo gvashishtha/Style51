@@ -44,12 +44,12 @@ int main (int argc, const char** argv) {
     printf("Filename invalid\n");
     return -1;
   }
-  char prev_char = fgetc(infile);
+  char prev_char = '\n';
   char cur_char = fgetc(infile);
   char next_char = fgetc(infile);
   bool comment, second, if_line, else_line = false;
-  int char_counter = 2;
-  int if_count = -1;
+  int char_counter = 1;
+  int if_count, match_count = -1;
   int c;
 
   while ((c = fgetc(infile)) != EOF) {
@@ -63,8 +63,12 @@ int main (int argc, const char** argv) {
        line_counter);
       second = true;
     }
-    if (prev_char == '(' && cur_char == '*') {
+    if (cur_char == '(' && next_char == '*') {
       comment = true;
+      if (prev_char != '\n') {
+        print_error((char*) "Comments should be above the code they referenc",
+          'e', char_counter, line_counter);
+      }
     }
     if (cur_char == '\t') {
       print_error((char*) "No tab characters allowed", '!', char_counter,
@@ -132,10 +136,24 @@ int main (int argc, const char** argv) {
         }
         ungetc(temp_c, infile);
     }
+    if (!comment && (prev_char == '\n' || prev_char == ' ') && cur_char == 'm'
+      && next_char == 'a' && c == 't') {
+
+        //advance to confirm it is a match
+        char temp0 = fgetc(infile); char temp1 = fgetc(infile);
+        char temp2 = fgetc(infile);
+        if (temp0 == 'c' && temp1 == 'h' && temp2 == ' ') {
+          match_count = char_counter;
+        }
+        ungetc(temp2, infile); ungetc(temp1, infile); ungetc(temp0, infile);
+    }
+    if (!comment && cur_char == '|' && match_count != char_counter) {
+      print_error((char*) "Mis-aligned match delimite", 'r', char_counter,
+      line_counter);
+    }
     if (comment && cur_char == '*' && next_char == ')') {
       comment = false;
     }
-    //printf("DEBUG: char is %c position %i ifcount is %i\n", cur_char, char_counter, if_count);
     prev_char = cur_char;
     cur_char = next_char;
     next_char = c;
@@ -151,6 +169,9 @@ int main (int argc, const char** argv) {
       ANSI_COLOR_RESET "\n", error_count, plural);
   }
   else {
-    printf(ANSI_COLOR_GREEN "Your code looks great!" ANSI_COLOR_RESET "\n");
+    printf(ANSI_COLOR_GREEN "Your code looks great! You should still check that\n\
+    - All top-level function definitions have type definitions\n\
+    - You pattern-match within function arguments when possible\n\
+    - You've followed the correct naming conventions" ANSI_COLOR_RESET "\n");
   }
 }

@@ -1,0 +1,22 @@
+
+if exp1 then longexp2
+else shortexp3
+
+if exp1 then shortexp2
+else if exp3
+then shortexp4
+else if exp5 then shortexp6
+else exp8
+
+if exp1 then
+  longexp2
+else shortexp3
+if exp1 then
+  longexp2
+else
+  longexp3
+
+  match l with
+| []         -> a
+  | (x, y) :: t -> if x = 0 then helper a t
+                   else y :: helper a ((x - 1, y) :: t) in
