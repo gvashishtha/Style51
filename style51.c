@@ -1,10 +1,10 @@
 /*
-* space_checker.C
+* style51.C
 *
 * Gopal K. Vashishtha
 * gopalvashishtha@college.harvard.edu
 *
-* Checks Ocaml source code for correct spacing, per the CS51 style guide
+* Checks Ocaml source code for correct style, per the CS51 style guide
 * Guide here: https://github.com/gvashishtha/ocaml_style/blob/master/style_guide.pdf
 * Usage: ./<object_filename> <path to ocaml source>
 */
