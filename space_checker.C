@@ -50,10 +50,9 @@ int main (int argc, const char** argv) {
   bool comment, second, if_line, else_line = false;
   int char_counter = 2;
   int if_count = -1;
-
   int c;
-  while ((c = fgetc(infile)) != EOF) {
 
+  while ((c = fgetc(infile)) != EOF) {
     if (prev_char == '\n') {
       line_counter += 1;
       char_counter = 1;
@@ -75,75 +74,60 @@ int main (int argc, const char** argv) {
     //Single character things to be padded by spaces
     if (!comment && (cur_char == ':' || cur_char == '+' || cur_char == '*' ||
     cur_char == '/' || cur_char == '-' || cur_char == '>' || cur_char == '<'
-    || cur_char == '=')) {
-      char to_check = prev_char;
-
+    || cur_char == '=' || cur_char == '^')) {
+      char temp_prev = prev_char;
       // check if we need to advance by one
-      if (next_char == ':' || next_char == '=' || next_char == '\n' ||
+      if (next_char == ':' || next_char == '=' ||
       next_char == '>' || next_char == '*' || next_char == '.' ) {
+        char temp_c = fgetc(infile);
         prev_char = cur_char;
         cur_char = next_char;
         next_char = c;
-        c = fgetc(infile);
+        c = temp_c;
         char_counter++;
       }
-      if (cur_char == '\n') {
-        continue;
-      }
-      if (next_char != ' ' || to_check != ' ') {
+      if ((next_char != ' ' && next_char != '\n') || temp_prev != ' ') {
         print_error((char*) "Incorrect spacing around ", cur_char,
         char_counter, line_counter);
       }
     }
-    if (! comment && (cur_char == ',' || cur_char == ';')) {
-      if (next_char != ' ' && next_char != ';' && next_char != '\n') {
-        print_error((char*) "Not enough space after ", cur_char, char_counter,
-          line_counter);
-      }
+    if (!comment && (cur_char == ',' || cur_char == ';') && next_char != ' '
+      && next_char != ';' && next_char != '\n') {
+      print_error((char*) "Not enough space after ", cur_char, char_counter,
+        line_counter);
     }
 
-
-
-    // this is an if with high likelihood
-    if (!else_line && !comment && prev_char == 'i' && cur_char == 'f'
-    && next_char == ' ') {
+    // this is an if
+    if (!else_line && !comment && (prev_char == '\n' || prev_char == ' ')
+     && cur_char == 'i' && next_char == 'f' && c == ' ') {
       if_count = char_counter;
       if_line = true;
     }
-    if (!comment && !if_line && prev_char == 'e' && cur_char == 'l'
-      && next_char == 's') {
+    if (!comment && !if_line && !else_line &&
+      (prev_char == ' ' || prev_char == '\n') && cur_char == 'e'
+      && next_char == 'l' && c == 's') {
+
         //advance to confirm it is an else
-        char temp_prev = cur_char;
-        char temp_cur = next_char;
-        char temp_next = c;
         char temp_c = fgetc(infile);
-        temp_prev = temp_cur;
-        temp_cur = temp_next;
-        temp_next = temp_c;
-        //temp_c = fgetc(infile);
-        if (temp_cur == 'e' && temp_next == ' ') {
+        char temp1_c = fgetc(infile);
+        if (temp_c  == 'e' && temp1_c == ' ') {
           else_line = true;
           if (char_counter != if_count) {
-            print_error((char*) "Mis-aligned els", 'e', (char_counter - 1),
+            printf("if counter is %i cur_count is %i\n", if_count, char_counter);
+            print_error((char*) "Mis-aligned els", 'e', (char_counter),
             line_counter);
           }
         }
-        ungetc(temp_c, infile);
+        ungetc(temp1_c, infile); ungetc(temp_c, infile);
     }
-    if (!comment && !if_line && !else_line && prev_char == 't'
-      && cur_char == 'h' && next_char == 'e') {
+    if (!comment && !if_line && !else_line &&
+      (prev_char == '\n' || prev_char == ' ') && cur_char == 'h'
+      && next_char == 'e' && c == 'n') {
+
         //advance to confirm it is a then
-        char temp_prev = cur_char;
-        char temp_cur = next_char;
-        char temp_next = c;
         char temp_c = fgetc(infile);
-        temp_prev = temp_cur;
-        temp_cur = temp_next;
-        temp_next = temp_c;
-        //temp_c = fgetc(infile);
-        if (temp_cur == 'n' && temp_next == ' ') {
-          //else_line = true;
-          print_error((char*) "Then should be on previous lin", 'e',
+        if (temp_c == ' ') {
+          print_error((char*) "\'Then\' should be on previous lin", 'e',
             (char_counter - 1),line_counter);
         }
         ungetc(temp_c, infile);
@@ -156,7 +140,6 @@ int main (int argc, const char** argv) {
     cur_char = next_char;
     next_char = c;
     char_counter++;
-
   }
   fclose(infile);
   if (errors_generated) {
