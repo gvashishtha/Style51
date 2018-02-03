@@ -10,6 +10,7 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -29,14 +30,27 @@ void print_error(char* message, char cur_char,
 }
 
 int main (int argc, const char** argv) {
+  if (argc < 2) {
+    printf("Usage: ./spaces.o <path to filename> [<# of spaces in a tab>]\n");
+    return -1;
+  }
+  if (argc > 2) {
+    int space_length = atoi(argv[1]);
+  }
+
   int line_counter = 1;
   FILE* infile = fopen(argv[1], "r");
+  if (infile == NULL) {
+    printf("Filename invalid\n");
+    return -1;
+  }
   char prev_char = fgetc(infile);
   char cur_char = fgetc(infile);
   char next_char = fgetc(infile);
   bool comment, second, if_line, else_line = false;
   int char_counter = 2;
   int if_count = -1;
+
   int c;
   while ((c = fgetc(infile)) != EOF) {
 
