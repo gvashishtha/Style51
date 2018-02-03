@@ -17,38 +17,53 @@
 #define ANSI_COLOR_RESET   "\x1b[0m"
 #define BOLDRED     "\033[1m\033[31m"
 
+int error_count = 0;
+bool errors_generated = false;
+
+void print_error(char* message, char cur_char,
+  int char_counter, int line_counter) {
+  printf(BOLDRED "%i:%i" ANSI_COLOR_RESET ANSI_COLOR_RED " - %s%c"
+  ANSI_COLOR_RESET "\n", line_counter, char_counter, message, cur_char);
+  errors_generated = true;
+  error_count++;
+}
+
 int main (int argc, const char** argv) {
   int line_counter = 1;
   FILE* infile = fopen(argv[1], "r");
   char prev_char = fgetc(infile);
-  //printf("%c",prev_char);
   char cur_char = fgetc(infile);
   char next_char = fgetc(infile);
-  bool comment = false;
-  bool first = false;
-  bool errors_generated = false;
+  bool comment, second, if_line, else_line = false;
   int char_counter = 2;
+  int if_count = -1;
   int c;
   while ((c = fgetc(infile)) != EOF) {
-    //printf("%c",c);
-    char_counter++;
+
     if (prev_char == '\n') {
       line_counter += 1;
-      char_counter = 0;
+      char_counter = 1;
+      second = false; if_line = false; else_line = false;
     }
-
+    if (char_counter > 80 && !second) {
+      print_error((char*) "More than 80 characters", '!', char_counter,
+       line_counter);
+      second = true;
+    }
     if (prev_char == '(' && cur_char == '*') {
-      //printf("entering comment on line %i",line_counter);
       comment = true;
     }
-    // TODO: We're currently getting -> and cons as errors, also new lines after =
+    if (cur_char == '\t') {
+      print_error((char*) "No tab characters allowed", '!', char_counter,
+        line_counter);
+    }
 
     //Single character things to be padded by spaces
     if (!comment && (cur_char == ':' || cur_char == '+' || cur_char == '*' ||
     cur_char == '/' || cur_char == '-' || cur_char == '>' || cur_char == '<'
     || cur_char == '=')) {
-      //printf("triggered for cur_char %c on line %i\n", cur_char, line_counter);
       char to_check = prev_char;
+
       // check if we need to advance by one
       if (next_char == ':' || next_char == '=' || next_char == '\n' ||
       next_char == '>' || next_char == '*' || next_char == '.' ) {
@@ -56,36 +71,67 @@ int main (int argc, const char** argv) {
         cur_char = next_char;
         next_char = c;
         c = fgetc(infile);
+        char_counter++;
       }
       if (cur_char == '\n') {
         continue;
       }
-      //printf("cur char is %c on line %i", cur_char, line_counter);
       if (next_char != ' ' || to_check != ' ') {
-        printf(ANSI_COLOR_RED
-          "Incorrect spacing around %c at position %i on line" ANSI_COLOR_RESET
-          BOLDRED " %i"  ANSI_COLOR_RESET "\n", cur_char, char_counter, line_counter);
-        errors_generated = true;
+        print_error((char*) "Incorrect spacing around ", cur_char,
+        char_counter, line_counter);
       }
     }
     if (! comment && (cur_char == ',' || cur_char == ';')) {
       if (next_char != ' ' && next_char != ';' && next_char != '\n') {
-        printf(ANSI_COLOR_RED "Missing space after %c at position %i on line"
-        ANSI_COLOR_RESET BOLDRED " %i"
-        ANSI_COLOR_RESET"\n", cur_char, char_counter, line_counter);
-        errors_generated = true;
+        print_error((char*) "Not enough space after ", cur_char, char_counter,
+          line_counter);
       }
+    }
+    
+    // this is an if with high likelihood
+    if (!else_line && !comment && prev_char == 'i' && cur_char == 'f'
+    && next_char == ' ') {
+      if_count = char_counter;
+      if_line = true;
+    }
+    if (!comment && !if_line && prev_char == 'e' && cur_char == 'l'
+      && next_char == 's') {
+        //advance to confirm it is an else
+        char temp_prev = cur_char;
+        char temp_cur = next_char;
+        char temp_next = c;
+        char temp_c = fgetc(infile);
+        temp_prev = temp_cur;
+        temp_cur = temp_next;
+        temp_next = temp_c;
+        //temp_c = fgetc(infile);
+        if (temp_cur == 'e' && temp_next == ' ') {
+          else_line = true;
+          if (char_counter != if_count) {
+            print_error((char*) "Mis-aligned els", 'e', (char_counter - 1),
+            line_counter);
+          }
+        }
+        ungetc(temp_c, infile);
     }
     if (comment && cur_char == '*' && next_char == ')') {
       comment = false;
     }
+    //printf("DEBUG: char is %c position %i ifcount is %i\n", cur_char, char_counter, if_count);
     prev_char = cur_char;
     cur_char = next_char;
     next_char = c;
+    char_counter++;
+
   }
   fclose(infile);
   if (errors_generated) {
-    printf(ANSI_COLOR_YELLOW "Errors detected - see above" ANSI_COLOR_RESET "\n");
+    char plural[3] = "rs";
+    if (error_count == 1) {
+      plural[1] = '\0';
+    }
+    printf(ANSI_COLOR_YELLOW "%i erro%s detected - see above"
+      ANSI_COLOR_RESET "\n", error_count, plural);
   }
   else {
     printf(ANSI_COLOR_GREEN "Your code looks great!" ANSI_COLOR_RESET "\n");
