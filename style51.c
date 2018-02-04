@@ -9,7 +9,6 @@
 * Usage: ./<object_filename> <path to ocaml source>
 */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -36,7 +35,7 @@ int main (int argc, const char** argv) {
     printf("Usage: ./spaces.o <path to filename> [<# of spaces in a tab>]\n");
     return -1;
   }
-  if (argc > 2) {
+  if (argc == 2) {
     int space_length = atoi(argv[1]);
   }
 
@@ -55,9 +54,10 @@ int main (int argc, const char** argv) {
   int c;
 
   while ((c = fgetc(infile)) != EOF) {
-    if (prev_char == '\n') {
+    //printf("%c", cur_char);
+    if (cur_char == '\n') {
       line_counter += 1;
-      char_counter = 1;
+      char_counter = 0;
       second = false; if_line = false; else_line = false;
     }
     if (char_counter > 80 && !second) {
@@ -104,8 +104,8 @@ int main (int argc, const char** argv) {
     }
 
     // this is an if
-    if (!else_line && !comment && (prev_char == '\n' || prev_char == ' ')
-     && cur_char == 'i' && next_char == 'f' && c == ' ') {
+    if (!else_line && !comment && (prev_char == '\n' || prev_char == ' ' ||
+     prev_char == '>') && cur_char == 'i' && next_char == 'f' && c == ' ') {
       if_count = char_counter;
       if_line = true;
     }
@@ -119,7 +119,7 @@ int main (int argc, const char** argv) {
         if (temp_c  == 'e' && temp1_c == ' ') {
           else_line = true;
           if (char_counter != if_count) {
-            printf("if counter is %i cur_count is %i\n", if_count, char_counter);
+            //printf("if counter is %i cur_count is %i\n", if_count, char_counter);
             print_error((char*) "Mis-aligned els", 'e', (char_counter),
             line_counter);
           }
