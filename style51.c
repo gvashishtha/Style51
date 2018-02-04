@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -54,7 +55,6 @@ int main (int argc, const char** argv) {
   int c;
 
   while ((c = fgetc(infile)) != EOF) {
-    //printf("%c", cur_char);
     if (cur_char == '\n') {
       line_counter += 1;
       char_counter = 0;
@@ -79,8 +79,9 @@ int main (int argc, const char** argv) {
 
     //Single character things to be padded by spaces
     if (!comment && (cur_char == ':' || cur_char == '+' || cur_char == '*' ||
-    cur_char == '/' || cur_char == '-' || cur_char == '>' || cur_char == '<'
-    || cur_char == '=' || cur_char == '^')) {
+    cur_char == '/' || (cur_char == '-' && !isdigit(next_char))
+    || cur_char == '>' || cur_char == '<' || cur_char == '='
+    || cur_char == '^')) {
       char temp_prev = prev_char;
       // check if we need to advance by one
       if (next_char == ':' || next_char == '=' ||
