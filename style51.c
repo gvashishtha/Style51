@@ -56,6 +56,9 @@ int main (int argc, const char** argv) {
 
   while ((c = fgetc(infile)) != EOF) {
     if (cur_char == '\n') {
+      if (prev_char == '\n' && next_char == '\n') {
+        print_error((char*) "Double newlin", 'e', char_counter, line_counter);
+      }
       line_counter += 1;
       char_counter = 0;
       second = false; if_line = false; else_line = false;
@@ -163,11 +166,11 @@ int main (int argc, const char** argv) {
   }
   fclose(infile);
   if (errors_generated) {
-    char plural[3] = "rs";
+    char plural[3] = "es";
     if (error_count == 1) {
       plural[1] = '\0';
     }
-    printf(ANSI_COLOR_YELLOW "%i erro%s detected - see above"
+    printf(ANSI_COLOR_YELLOW "%i issu%s detected - see above"
       ANSI_COLOR_RESET "\n", error_count, plural);
   }
   else {
