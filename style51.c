@@ -5,7 +5,8 @@
 * gopalvashishtha@college.harvard.edu
 *
 * Checks Ocaml source code for correct style, per the CS51 style guide
-* Guide here: https://github.com/gvashishtha/ocaml_style/blob/master/style_guide.pdf
+* Guide here:
+* https://github.com/gvashishtha/ocaml_style/blob/master/style_guide.pdf
 * Usage: ./<object_filename> <path to ocaml source>
 */
 
