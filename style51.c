@@ -120,7 +120,6 @@ int main (int argc, const char** argv) {
         if (temp_c  == 'e' && temp1_c == ' ') {
           else_line = true;
           if (char_counter != if_count) {
-            //printf("if counter is %i cur_count is %i\n", if_count, char_counter);
             print_error((char*) "Mis-aligned els", 'e', (char_counter),
             line_counter);
           }
@@ -128,16 +127,16 @@ int main (int argc, const char** argv) {
         ungetc(temp1_c, infile); ungetc(temp_c, infile);
     }
     if (!comment && !if_line && !else_line &&
-      (prev_char == '\n' || prev_char == ' ') && cur_char == 'h'
-      && next_char == 'e' && c == 'n') {
+      (prev_char == '\n' || prev_char == ' ') && cur_char == 't'
+      && next_char == 'h' && c == 'e') {
 
         //advance to confirm it is a then
-        char temp_c = fgetc(infile);
-        if (temp_c == ' ') {
+        char temp_c = fgetc(infile); char temp1_c = fgetc(infile);
+        if (temp_c == 'n' && temp1_c == ' ') {
           print_error((char*) "\'Then\' should be on previous lin", 'e',
             (char_counter - 1),line_counter);
         }
-        ungetc(temp_c, infile);
+        ungetc(temp1_c, infile); ungetc(temp1_c, infile);
     }
     if (!comment && (prev_char == '\n' || prev_char == ' ') && cur_char == 'm'
       && next_char == 'a' && c == 't') {
