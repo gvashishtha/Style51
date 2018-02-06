@@ -7,7 +7,7 @@
 * Checks Ocaml source code for correct style, per the CS51 style guide
 * Guide here:
 * https://github.com/gvashishtha/ocaml_style/blob/master/style_guide.pdf
-* Usage: ./<object_filename> <path to ocaml source>
+* Usage: ./<object_filename> <path to ocaml source> <space_length>
 */
 
 #include <stdio.h>
@@ -23,11 +23,12 @@
 
 int error_count = 0;
 bool errors_generated = false;
+int line_counter = 1; int char_counter = 1;
 
-void print_error(char* message, char cur_char,
-  int char_counter, int line_counter) {
+
+void print_error(char* message, char cur_char, int offset) {
   printf(BOLDRED "%i:%i" ANSI_COLOR_RESET ANSI_COLOR_RED " - %s%c"
-  ANSI_COLOR_RESET "\n", line_counter, char_counter, message, cur_char);
+  ANSI_COLOR_RESET "\n", line_counter, char_counter + offset, message, cur_char);
   errors_generated = true;
   error_count++;
 }
@@ -37,48 +38,63 @@ int main (int argc, const char** argv) {
     printf("Usage: ./spaces.o <path to filename> [<# of spaces in a tab>]\n");
     return -1;
   }
-  if (argc == 2) {
-    int space_length = atoi(argv[1]);
+  int space_length = 2;
+  if (argc == 3) {
+    space_length = atoi(argv[1]);
   }
 
-  int line_counter = 1;
+
   FILE* infile = fopen(argv[1], "r");
   if (infile == NULL) {
     printf("Filename invalid\n");
     return -1;
   }
-  char prev_char = '\n';
+  char prev_char = '\0';
   char cur_char = fgetc(infile);
   char next_char = fgetc(infile);
-  bool comment, second, if_line, else_line = false;
-  int char_counter = 1;
+  bool comment, second, if_line, else_line, seen_char = false;
   int if_count, match_count = -1;
+  int space_count = 0;
   int c;
 
   while ((c = fgetc(infile)) != EOF) {
+    if (!comment && cur_char == ' ' && !seen_char) {
+      space_count++;
+    }
+    // if (!comment && !seen_char && cur_char != ' ') {
+    //   if (space_count % space_length != 0 && isalpha(cur_char)) {
+    //     print_error((char*) "Use 2 xor 4 spaces for tabs", '!', 0);
+    //   }
+    //   seen_char = true;
+    // }
     if (cur_char == '\n') {
       if (prev_char == '\n' && next_char == '\n') {
-        print_error((char*) "Double newlin", 'e', char_counter, line_counter);
+        print_error((char*) "Double newlin", 'e', 0);
       }
       line_counter += 1;
-      char_counter = 0;
-      second = false; if_line = false; else_line = false;
+      char_counter = 0; space_count = 0;
+      second = false; if_line = false; else_line = false; seen_char = false;
     }
     if (char_counter > 80 && !second) {
-      print_error((char*) "More than 80 characters", '!', char_counter,
-       line_counter);
+      print_error((char*) "More than 80 characters", '!', 0);
       second = true;
     }
     if (cur_char == '(' && next_char == '*') {
       comment = true;
-      if (prev_char != '\n') {
-        print_error((char*) "Comments should be above the code they referenc",
-          'e', char_counter, line_counter);
-      }
+      // if (prev_char != '\n') {
+      //   print_error((char*) "Comments should be above the code they reference",
+      //     '.', 0);
+      // }
     }
     if (cur_char == '\t') {
-      print_error((char*) "No tab characters allowed", '!', char_counter,
-        line_counter);
+      print_error((char*) "No tab characters allowed", '!', 0);
+    }
+
+    // Deal with expressions like (x -1)
+    if (!comment && next_char == '-' && isalpha(prev_char)) {\
+      if (c != ' ' && isdigit(c)) {
+        print_error((char*) "Incorrect spacing around ", '-', 0);
+      }
     }
 
     //Single character things to be padded by spaces
@@ -98,14 +114,12 @@ int main (int argc, const char** argv) {
         char_counter++;
       }
       if ((next_char != ' ' && next_char != '\n') || temp_prev != ' ') {
-        print_error((char*) "Incorrect spacing around ", cur_char,
-        char_counter, line_counter);
+        print_error((char*) "Incorrect spacing around ", cur_char, 0);
       }
     }
     if (!comment && (cur_char == ',' || cur_char == ';') && next_char != ' '
       && next_char != ';' && next_char != '\n') {
-      print_error((char*) "Not enough space after ", cur_char, char_counter,
-        line_counter);
+      print_error((char*) "Not enough space after ", cur_char, 0);
     }
 
     // this is an if
@@ -124,8 +138,7 @@ int main (int argc, const char** argv) {
         if (temp_c  == 'e' && temp1_c == ' ') {
           else_line = true;
           if (char_counter != if_count) {
-            print_error((char*) "Mis-aligned els", 'e', (char_counter),
-            line_counter);
+            print_error((char*) "Mis-aligned els", 'e', 0);
           }
         }
         ungetc(temp1_c, infile); ungetc(temp_c, infile);
@@ -137,8 +150,7 @@ int main (int argc, const char** argv) {
         //advance to confirm it is a then
         char temp_c = fgetc(infile); char temp1_c = fgetc(infile);
         if (temp_c == 'n' && temp1_c == ' ') {
-          print_error((char*) "\'Then\' should be on previous lin", 'e',
-            (char_counter - 1),line_counter);
+          print_error((char*) "\'Then\' should be on previous lin", 'e',-1);
         }
         ungetc(temp1_c, infile); ungetc(temp1_c, infile);
     }
@@ -154,8 +166,7 @@ int main (int argc, const char** argv) {
         ungetc(temp2, infile); ungetc(temp1, infile); ungetc(temp0, infile);
     }
     if (!comment && cur_char == '|' && match_count != char_counter) {
-      print_error((char*) "Mis-aligned match delimite", 'r', char_counter,
-      line_counter);
+      print_error((char*) "Mis-aligned match delimite", 'r', 0);
     }
     if (comment && cur_char == '*' && next_char == ')') {
       comment = false;
