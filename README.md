@@ -17,4 +17,4 @@ Style 51 **does not** check for the following issues:
 1. Using 2 spaces or 4 spaces inconsistently to represent tabs.
 2. Keeping 'let' statements at the same indentation level.
 3. Using minimal parentheses.
-4. Removing space from around mathematical operators to emphasize precedence (as in 4*3 + 1*1).
+4. Removing space from around mathematical operators to emphasize precedence (as in 4\*3 + 1\*1).
