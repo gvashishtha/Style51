@@ -10,10 +10,11 @@
 * Usage: ./<object_filename> <path to ocaml source> <space_length>
 */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <ctype.h>
+#include <string.h>
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -34,16 +35,10 @@ void print_error(char* message, char cur_char, int offset) {
 }
 
 int main (int argc, const char** argv) {
-  if (argc < 2) {
-    printf("Usage: ./spaces.o <path to filename> [<# of spaces in a tab>]\n");
+  if (argc != 2) {
+    printf("Usage: ./spaces.o <path to filename>\n");
     return -1;
   }
-  int space_length = 2;
-  if (argc == 3) {
-    space_length = atoi(argv[1]);
-  }
-
-
   FILE* infile = fopen(argv[1], "r");
   if (infile == NULL) {
     printf("Filename invalid\n");
@@ -52,25 +47,19 @@ int main (int argc, const char** argv) {
   char prev_char = '\0';
   char cur_char = fgetc(infile);
   char next_char = fgetc(infile);
-  bool comment, second, if_line, else_line, seen_char = false;
+  char buffer[50] = "Spacing incorrect around ";
+  char chr[3] = "";
+  bool comment, second, if_line, else_line, seen_char, double_c = false;
   int if_count, match_count = -1;
   int space_count = 0;
   int c;
 
   while ((c = fgetc(infile)) != EOF) {
+    chr[0] = '\0'; chr[1] = '\0';
     if (!comment && cur_char == ' ' && !seen_char) {
       space_count++;
     }
-    // if (!comment && !seen_char && cur_char != ' ') {
-    //   if (space_count % space_length != 0 && isalpha(cur_char)) {
-    //     print_error((char*) "Use 2 xor 4 spaces for tabs", '!', 0);
-    //   }
-    //   seen_char = true;
-    // }
     if (cur_char == '\n') {
-      if (prev_char == '\n' && next_char == '\n') {
-        print_error((char*) "Double newlin", 'e', 0);
-      }
       line_counter += 1;
       char_counter = 0; space_count = 0;
       second = false; if_line = false; else_line = false; seen_char = false;
@@ -81,10 +70,6 @@ int main (int argc, const char** argv) {
     }
     if (cur_char == '(' && next_char == '*') {
       comment = true;
-      // if (prev_char != '\n') {
-      //   print_error((char*) "Comments should be above the code they reference",
-      //     '.', 0);
-      // }
     }
     if (cur_char == '\t') {
       print_error((char*) "No tab characters allowed", '!', 0);
@@ -112,14 +97,35 @@ int main (int argc, const char** argv) {
         next_char = c;
         c = temp_c;
         char_counter++;
+        chr[0] = prev_char;
       }
       if ((next_char != ' ' && next_char != '\n') || temp_prev != ' ') {
-        print_error((char*) "Incorrect spacing around ", cur_char, 0);
+        buffer[25] = '\0';
+        print_error((char*) strcat(buffer, chr), cur_char, 0);
+
       }
     }
-    if (!comment && (cur_char == ',' || cur_char == ';') && next_char != ' '
-      && next_char != ';' && next_char != '\n') {
-      print_error((char*) "Not enough space after ", cur_char, 0);
+    if (!comment && cur_char == ','&& prev_char != ' ' && next_char != ' ') {
+      print_error((char*) "Spacing incorrect around ", cur_char, 0);
+    }
+
+    if (!comment && cur_char == ';') {
+      // this is a double semi-colon
+      if (next_char == ';') {
+        if (prev_char != ' ' || c != '\n') {
+            print_error((char*) "Spacing incorrect around ;", cur_char, 0);
+        }
+        char temp_c = fgetc(infile);
+        prev_char = cur_char;
+        cur_char = next_char;
+        next_char = c;
+        c = temp_c;
+        char_counter++;
+
+      }
+      else if (prev_char == ' ' || (next_char != ' ' && next_char != '\n')){
+        print_error((char*) "Spacing incorrect at ", cur_char, 0);
+      }
     }
 
     // this is an if
