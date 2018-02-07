@@ -7,7 +7,7 @@
 * Checks Ocaml source code for correct style, per the CS51 style guide
 * Guide here:
 * https://github.com/gvashishtha/ocaml_style/blob/master/style_guide.pdf
-* Usage: ./<object_filename> <path to ocaml source> <space_length>
+* Usage: ./<object_filename> <path to ocaml source>
 */
 
 #include <ctype.h>
