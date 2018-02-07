@@ -17,4 +17,7 @@ Style 51 **does not** check for the following issues:
 1. Using 2 spaces or 4 spaces inconsistently to represent tabs.
 2. Keeping 'let' statements at the same indentation level.
 3. Using minimal parentheses.
-4. Removing space from around mathematical operators to emphasize precedence (as in 4\*3 + 1\*1).
+
+Additionally, Style51 marks the following things as errors, even though they are permitted by the style guide.
+1. Removing space from around mathematical operators to emphasize precedence (as in 4\*3 + 1\*1).
+2. Putting 'then' at the beginning of a newline in non-nested conditionals.
