@@ -7,7 +7,7 @@
 * Checks Ocaml source code for correct style, per the CS51 style guide
 * Guide here:
 * https://github.com/gvashishtha/ocaml_style/blob/master/style_guide.pdf
-* Usage: ./<object_filename> <path to ocaml source>
+* Usage: ./<object_filename> <path to ocaml source> <flags>
 */
 
 #include <ctype.h>
@@ -35,14 +35,30 @@ void print_error(char* message, char cur_char, int offset) {
 }
 
 int main (int argc, const char** argv) {
-  if (argc != 2) {
-    printf("Usage: ./spaces.o <path to filename>\n");
+  if (argc != 2 && argc != 3) {
+    printf("Usage: ./spaces.o <path to filename> -<flags>\n");
     return -1;
   }
   FILE* infile = fopen(argv[1], "r");
   if (infile == NULL) {
     printf("Filename invalid\n");
     return -1;
+  }
+  bool match_check = true, then_check = true, semi_check = true;
+  if (argc == 3) {
+    char buf[2] =  "m";
+    if (strstr(argv[2], buf) != NULL){
+      match_check = false;
+
+    }
+    buf[0] = 't';
+    if (strstr(argv[2], buf) != NULL){
+      then_check = false;
+    }
+    buf[0] = 's';
+    if (strstr(argv[2], buf) != NULL){
+      semi_check = false;
+    }
   }
   char prev_char = '\0';
   char cur_char = fgetc(infile);
@@ -70,7 +86,6 @@ int main (int argc, const char** argv) {
     }
     if (cur_char == '(' && next_char == '*') {
       comment = true;
-      printf("activated on line %i\n", line_counter);
     }
     if (cur_char == '\t') {
       print_error((char*) "No tab characters allowed", '!', 0);
@@ -110,7 +125,7 @@ int main (int argc, const char** argv) {
 
       }
     }
-    if (!comment && cur_char == ','&& prev_char != ' ' && next_char != ' ') {
+    if (!comment && cur_char == ','&& prev_char != ' ' && next_char != ' ' && next_char != '\n') {
       print_error((char*) "Spacing incorrect around ", cur_char, 0);
     }
 
@@ -118,7 +133,7 @@ int main (int argc, const char** argv) {
 
       // this is a double semi-colon
       if (next_char == ';') {
-        if (prev_char != ' ' || c != '\n') {
+        if (semi_check && (prev_char != ' ' || c != '\n')) {
             print_error((char*) "Spacing incorrect around ;", cur_char, 0);
         }
         char temp_c = fgetc(infile);
@@ -155,7 +170,7 @@ int main (int argc, const char** argv) {
         }
         ungetc(temp1_c, infile); ungetc(temp_c, infile);
     }
-    if (!comment && !if_line && !else_line &&
+    if (!comment && then_check && !if_line && !else_line &&
       (prev_char == '\n' || prev_char == ' ') && cur_char == 't'
       && next_char == 'h' && c == 'e') {
 
@@ -168,7 +183,6 @@ int main (int argc, const char** argv) {
     }
     if (!comment && (prev_char == '\n' || prev_char == ' ') && cur_char == 'm'
       && next_char == 'a' && c == 't') {
-
         //advance to confirm it is a match
         char temp0 = fgetc(infile); char temp1 = fgetc(infile);
         char temp2 = fgetc(infile);
@@ -177,7 +191,7 @@ int main (int argc, const char** argv) {
         }
         ungetc(temp2, infile); ungetc(temp1, infile); ungetc(temp0, infile);
     }
-    if (!comment && cur_char == '|' && match_count != char_counter && !seen_bar) {
+    if (!comment && match_check && cur_char == '|' && match_count != char_counter && !seen_bar) {
       print_error((char*) "Mis-aligned match delimite", 'r', 0);
     }
     else {
@@ -197,7 +211,7 @@ int main (int argc, const char** argv) {
     if (error_count == 1) {
       plural[1] = '\0';
     }
-    printf(ANSI_COLOR_YELLOW "%i issu%s detected - see above"
+    printf(ANSI_COLOR_YELLOW "%i issu%s detected - see above. \nTo silence some errors, rerun with -m, -s, -t flags"
       ANSI_COLOR_RESET "\n", error_count, plural);
   }
   else {
