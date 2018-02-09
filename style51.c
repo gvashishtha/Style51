@@ -45,6 +45,7 @@ int main (int argc, const char** argv) {
     return -1;
   }
   bool match_check = true, then_check = true, semi_check = true;
+  bool ops_check = true;
   if (argc == 3) {
     char buf[2] =  "m";
     if (strstr(argv[2], buf) != NULL){
@@ -58,6 +59,10 @@ int main (int argc, const char** argv) {
     buf[0] = 's';
     if (strstr(argv[2], buf) != NULL){
       semi_check = false;
+    }
+    buf[0] = 'o';
+    if (strstr(argv[2], buf) != NULL){
+      ops_check = false;
     }
   }
   char prev_char = '\0';
@@ -98,7 +103,7 @@ int main (int argc, const char** argv) {
       }
     }
     //Single character things to be padded by spaces
-    if (!comment && (cur_char == ':' || cur_char == '+' || cur_char == '*' ||
+    if (!comment && ops_check && (cur_char == ':' || cur_char == '+' || cur_char == '*' ||
     cur_char == '/' || (cur_char == '-' && !isdigit(next_char))
     || cur_char == '>' || cur_char == '<' || cur_char == '='
     || cur_char == '^' || (cur_char == '|' && next_char == '|')
@@ -197,6 +202,9 @@ int main (int argc, const char** argv) {
     else {
       seen_bar = false;
     }
+    if (!comment && cur_char == '(' && prev_char != ' ') {
+      print_error((char*) "Missing space before parenthesi", 's', 0);
+    }
     if (comment && cur_char == '*' && next_char == ')') {
       comment = false;
     }
@@ -211,7 +219,7 @@ int main (int argc, const char** argv) {
     if (error_count == 1) {
       plural[1] = '\0';
     }
-    printf(ANSI_COLOR_YELLOW "%i issu%s detected - see above. \nTo silence some errors, rerun with -m, -s, -t flags"
+    printf(ANSI_COLOR_YELLOW "%i issu%s detected - see above. \nTo silence some errors, rerun with -m, -s, -t, -o flags"
       ANSI_COLOR_RESET "\n", error_count, plural);
   }
   else {
