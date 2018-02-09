@@ -1,6 +1,12 @@
 # Style51
 Checks ocaml code for style errors, per [CS51 style guide](https://github.com/gvashishtha/ocaml_style/blob/master/style_guide.pdf)
 
+Flags (write in a group as in `-msto` after filename):
+`-m` to silence match warnings
+`-t` to silence then warnings
+`-o` to silence warnings around mathematical operators
+`-s` to silence warnings at end-of-line semicolons
+
 As of right now, Style51 checks the following things:
 
 1. No more than 80 characters per line
