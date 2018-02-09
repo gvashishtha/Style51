@@ -70,7 +70,7 @@ int main (int argc, const char** argv) {
   char next_char = fgetc(infile);
   char buffer[50] = "Spacing incorrect around ";
   char chr[3] = "";
-  bool second = false, if_line = false, else_line = false, seen_char = false; bool comment = false, double_c = false, seen_bar = false;
+  bool second = false, if_line = false, else_line = false, seen_char = false; bool comment = false, double_c = false, seen_bar = false, string = false;
   int if_count = -1, match_count = -1;
   int space_count = 0;
   int c;
@@ -79,6 +79,9 @@ int main (int argc, const char** argv) {
     chr[0] = '\0'; chr[1] = '\0';
     if (!comment && cur_char == ' ' && !seen_char) {
       space_count++;
+    }
+    if (cur_char == '"') {
+      string = !string;
     }
     if (cur_char == '\n') {
       line_counter += 1;
@@ -103,7 +106,7 @@ int main (int argc, const char** argv) {
       }
     }
     //Single character things to be padded by spaces
-    if (!comment && ops_check && (cur_char == ':' || cur_char == '+' || cur_char == '*' ||
+    if (!string && !comment && ops_check && (cur_char == ':' || cur_char == '+' || cur_char == '*' ||
     cur_char == '/' || (cur_char == '-' && !isdigit(next_char))
     || cur_char == '>' || cur_char == '<' || cur_char == '='
     || cur_char == '^' || (cur_char == '|' && next_char == '|')
@@ -130,11 +133,11 @@ int main (int argc, const char** argv) {
 
       }
     }
-    if (!comment && cur_char == ','&& prev_char != ' ' && next_char != ' ' && next_char != '\n') {
+    if (!string && !comment && cur_char == ','&& prev_char != ' ' && next_char != ' ' && next_char != '\n') {
       print_error((char*) "Spacing incorrect around ", cur_char, 0);
     }
 
-    if (!comment && cur_char == ';') {
+    if (!string && !comment && cur_char == ';') {
 
       // this is a double semi-colon
       if (next_char == ';') {
@@ -155,12 +158,12 @@ int main (int argc, const char** argv) {
     }
 
     // this is an if
-    if (!else_line && !comment && (prev_char == '\n' || prev_char == ' ' ||
+    if (! string && !else_line && !comment && (prev_char == '\n' || prev_char == ' ' ||
      prev_char == '>') && cur_char == 'i' && next_char == 'f' && c == ' ') {
       if_count = char_counter;
       if_line = true;
     }
-    if (!comment && !if_line && !else_line &&
+    if (!string && !comment && !if_line && !else_line &&
       (prev_char == ' ' || prev_char == '\n') && cur_char == 'e'
       && next_char == 'l' && c == 's') {
 
@@ -175,7 +178,7 @@ int main (int argc, const char** argv) {
         }
         ungetc(temp1_c, infile); ungetc(temp_c, infile);
     }
-    if (!comment && then_check && !if_line && !else_line &&
+    if (!string && !comment && then_check && !if_line && !else_line &&
       (prev_char == '\n' || prev_char == ' ') && cur_char == 't'
       && next_char == 'h' && c == 'e') {
 
@@ -186,7 +189,7 @@ int main (int argc, const char** argv) {
         }
         ungetc(temp1_c, infile); ungetc(temp1_c, infile);
     }
-    if (!comment && (prev_char == '\n' || prev_char == ' ') && cur_char == 'm'
+    if (!string && !comment && (prev_char == '\n' || prev_char == ' ') && cur_char == 'm'
       && next_char == 'a' && c == 't') {
         //advance to confirm it is a match
         char temp0 = fgetc(infile); char temp1 = fgetc(infile);
@@ -196,13 +199,13 @@ int main (int argc, const char** argv) {
         }
         ungetc(temp2, infile); ungetc(temp1, infile); ungetc(temp0, infile);
     }
-    if (!comment && match_check && cur_char == '|' && match_count != char_counter && !seen_bar) {
+    if (!string && !comment && match_check && cur_char == '|' && match_count != char_counter && !seen_bar) {
       print_error((char*) "Mis-aligned match delimite", 'r', 0);
     }
     else {
       seen_bar = false;
     }
-    if (!comment && cur_char == '(' && prev_char != ' ') {
+    if (!string && !comment && cur_char == '(' && prev_char != ' ') {
       print_error((char*) "Missing space before parenthesi", 's', 0);
     }
     if (comment && cur_char == '*' && next_char == ')') {
