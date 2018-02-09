@@ -49,8 +49,8 @@ int main (int argc, const char** argv) {
   char next_char = fgetc(infile);
   char buffer[50] = "Spacing incorrect around ";
   char chr[3] = "";
-  bool comment, second, if_line, else_line, seen_char, double_c = false;
-  int if_count, match_count = -1;
+  bool second = false, if_line = false, else_line = false, seen_char = false; bool comment = false, double_c = false, seen_bar = false;
+  int if_count = -1, match_count = -1;
   int space_count = 0;
   int c;
 
@@ -70,6 +70,7 @@ int main (int argc, const char** argv) {
     }
     if (cur_char == '(' && next_char == '*') {
       comment = true;
+      printf("activated on line %i\n", line_counter);
     }
     if (cur_char == '\t') {
       print_error((char*) "No tab characters allowed", '!', 0);
@@ -81,16 +82,17 @@ int main (int argc, const char** argv) {
         print_error((char*) "Incorrect spacing around ", '-', 0);
       }
     }
-
     //Single character things to be padded by spaces
     if (!comment && (cur_char == ':' || cur_char == '+' || cur_char == '*' ||
     cur_char == '/' || (cur_char == '-' && !isdigit(next_char))
     || cur_char == '>' || cur_char == '<' || cur_char == '='
-    || cur_char == '^')) {
+    || cur_char == '^' || (cur_char == '|' && next_char == '|')
+    || cur_char == '&')) {
       char temp_prev = prev_char;
+
       // check if we need to advance by one
       if (next_char == ':' || next_char == '=' ||
-      next_char == '>' || next_char == '*' || next_char == '.' ) {
+      next_char == '>' || next_char == '*' || next_char == '.' || next_char == '|' || next_char == '&') {
         char temp_c = fgetc(infile);
         prev_char = cur_char;
         cur_char = next_char;
@@ -98,6 +100,9 @@ int main (int argc, const char** argv) {
         c = temp_c;
         char_counter++;
         chr[0] = prev_char;
+        if (cur_char == '|') {
+          seen_bar = true;
+        }
       }
       if ((next_char != ' ' && next_char != '\n') || temp_prev != ' ') {
         buffer[25] = '\0';
@@ -110,6 +115,7 @@ int main (int argc, const char** argv) {
     }
 
     if (!comment && cur_char == ';') {
+
       // this is a double semi-colon
       if (next_char == ';') {
         if (prev_char != ' ' || c != '\n') {
@@ -171,8 +177,11 @@ int main (int argc, const char** argv) {
         }
         ungetc(temp2, infile); ungetc(temp1, infile); ungetc(temp0, infile);
     }
-    if (!comment && cur_char == '|' && match_count != char_counter) {
+    if (!comment && cur_char == '|' && match_count != char_counter && !seen_bar) {
       print_error((char*) "Mis-aligned match delimite", 'r', 0);
+    }
+    else {
+      seen_bar = false;
     }
     if (comment && cur_char == '*' && next_char == ')') {
       comment = false;
