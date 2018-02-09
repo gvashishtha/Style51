@@ -45,7 +45,7 @@ int main (int argc, const char** argv) {
     return -1;
   }
   bool match_check = true, then_check = true, semi_check = true;
-  bool ops_check = true;
+  bool ops_check = true, paren_check = true;
   if (argc == 3) {
     char buf[2] =  "m";
     if (strstr(argv[2], buf) != NULL){
@@ -63,6 +63,9 @@ int main (int argc, const char** argv) {
     buf[0] = 'o';
     if (strstr(argv[2], buf) != NULL){
       ops_check = false;
+    }
+    if (strstr(argv[2], "p") != NULL){
+      paren_check = false;
     }
   }
   char prev_char = '\0';
@@ -205,7 +208,7 @@ int main (int argc, const char** argv) {
     else {
       seen_bar = false;
     }
-    if (!string && !comment && cur_char == '(' && prev_char != ' ') {
+    if (paren_check && !string && !comment && cur_char == '(' && prev_char != ' ' && prev_char != '(') {
       print_error((char*) "Missing space before parenthesi", 's', 0);
     }
     if (comment && cur_char == '*' && next_char == ')') {
@@ -222,7 +225,7 @@ int main (int argc, const char** argv) {
     if (error_count == 1) {
       plural[1] = '\0';
     }
-    printf(ANSI_COLOR_YELLOW "%i issu%s detected - see above. \nTo silence some errors, rerun with -m, -s, -t, -o flags"
+    printf(ANSI_COLOR_YELLOW "%i issu%s detected - see above. \nTo silence some errors, rerun with -m, -s, -t, -o, -p flags"
       ANSI_COLOR_RESET "\n", error_count, plural);
   }
   else {
