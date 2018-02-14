@@ -19,6 +19,8 @@ You can compile the program by typing either "gcc style51.c -o style51.o" or "cl
 `-s` to silence warnings at end-of-line semicolons  
 `-p` to silence warnings about spacing around parentheses
 
+## Notes
+
 As of right now, Style51 checks the following things:
 
 1. No more than 80 characters per line
