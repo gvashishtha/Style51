@@ -7,7 +7,11 @@ To download, navigate within the terminal to the folder where you want to keep t
 
 You can compile the program by typing either "gcc style51.c -o style51.o" or "clang style51.c -o style51.o" (clang and gcc are C compilers). Once you compile the program, run by typing "./style51.o" followed by the path to your .ml file. If you are unsure about the path to your .ml file, navigate to the directory that contains it and type "pwd".
 
-## Flags
+## Usage
+
+./style51.o <path to ml file> -<flags>
+
+### Flags
 (write in a group as in `-mstop` after filename):  
 `-m` to silence match warnings  
 `-t` to silence then warnings  
