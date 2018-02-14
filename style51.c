@@ -8,6 +8,7 @@
 * Guide here:
 * https://github.com/gvashishtha/ocaml_style/blob/master/style_guide.pdf
 * Usage: ./<object_filename> <path to ocaml source> <flags>
+* TODO: Check for indentation of let blocks
 */
 
 #include <ctype.h>
