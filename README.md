@@ -9,7 +9,7 @@ You can compile the program by typing either "gcc style51.c -o style51.o" or "cl
 
 ## Usage
 
-./style51.o <path to ml file> -<flags>
+./style51.o \<path to ml file\> -\<flags\>
 
 ### Flags
 (write in a group as in `-mstop` after filename):  
