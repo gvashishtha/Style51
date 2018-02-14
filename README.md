@@ -1,13 +1,13 @@
 # Style51
 Checks ocaml code for style errors, per [CS51 style guide](https://github.com/gvashishtha/ocaml_style/blob/master/style_guide.pdf)
 
-##Directions:
+## Directions:
 
 To download, navigate within the terminal to the folder where you want to keep the file. Then type in "curl https://raw.githubusercontent.com/gvashishtha/Style51/master/style51.c > style51.c" or "wget https://raw.githubusercontent.com/gvashishtha/Style51/master/style51.c > style51.c"
 
 You can compile the program by typing either "gcc style51.c -o style51.o" or "clang style51.c -o style51.o" (clang and gcc are C compilers). Once you compile the program, run by typing "./style51.o" followed by the path to your .ml file. If you are unsure about the path to your .ml file, just move the .o file into the same directory as your .ml file and type "./style51.o ./ps1.ml"
 
-##Flags
+## Flags
 (write in a group as in `-mstop` after filename):  
 `-m` to silence match warnings  
 `-t` to silence then warnings  
