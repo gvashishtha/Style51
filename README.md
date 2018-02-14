@@ -12,7 +12,7 @@ You can compile the program by typing either "gcc style51.c -o style51.o" or "cl
 `-m` to silence match warnings  
 `-t` to silence then warnings  
 `-o` to silence warnings around mathematical operators  
-`-s` to silence warnings at end-of-line semicolons
+`-s` to silence warnings at end-of-line semicolons  
 `-p` to silence warnings about spacing around parentheses
 
 As of right now, Style51 checks the following things:
