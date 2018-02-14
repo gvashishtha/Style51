@@ -50,22 +50,27 @@ int main (int argc, const char** argv) {
   if (argc == 3) {
     char buf[2] =  "m";
     if (strstr(argv[2], buf) != NULL){
+      printf("flag m - Silencing errors around match statements\n");
       match_check = false;
 
     }
     buf[0] = 't';
     if (strstr(argv[2], buf) != NULL){
+      printf("flag t -Silencing errors around then\n");
       then_check = false;
     }
     buf[0] = 's';
     if (strstr(argv[2], buf) != NULL){
+      printf("flag s - Silencing errors around end-of-line semicolons\n");
       semi_check = false;
     }
     buf[0] = 'o';
     if (strstr(argv[2], buf) != NULL){
+      printf("flag o - Silencing errors around mathematical operators\n");
       ops_check = false;
     }
     if (strstr(argv[2], "p") != NULL){
+      printf("flag p - Silencing errors around parentheses\n");
       paren_check = false;
     }
   }
@@ -113,13 +118,14 @@ int main (int argc, const char** argv) {
     if (!string && !comment && ops_check && (cur_char == ':' || cur_char == '+' || cur_char == '*' ||
     cur_char == '/' || (cur_char == '-' && !isdigit(next_char))
     || cur_char == '>' || cur_char == '<' || cur_char == '='
-    || cur_char == '^' || (cur_char == '|' && next_char == '|')
-    || cur_char == '&')) {
+    || cur_char == '^' || (cur_char == '|' && (next_char == '|' || next_char == '>'))
+    || cur_char == '&' || (cur_char == '!' && next_char == '=')
+    || (cur_char == '~' && next_char == '-'))) {
       char temp_prev = prev_char;
 
       // check if we need to advance by one
       if (next_char == ':' || next_char == '=' ||
-      next_char == '>' || next_char == '*' || next_char == '.' || next_char == '|' || next_char == '&') {
+      next_char == '>' || next_char == '*' || next_char == '.' || next_char == '|' || next_char == '&' || next_char == '-') {
         char temp_c = fgetc(infile);
         prev_char = cur_char;
         cur_char = next_char;
