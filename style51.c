@@ -80,6 +80,7 @@ int main (int argc, const char** argv) {
   char buffer[50] = "Spacing incorrect around ";
   char chr[3] = "";
   bool second = false, if_line = false, else_line = false, seen_char = false; bool comment = false, double_c = false, seen_bar = false, string = false;
+  bool record = false;
   int if_count = -1, match_count = -1;
   int space_count = 0;
   int c;
@@ -89,6 +90,9 @@ int main (int argc, const char** argv) {
     if (!comment && cur_char == ' ' && !seen_char) {
       space_count++;
     }
+    if (!comment && cur_char == '{') {
+      record = true;
+    }
     if (cur_char == '"') {
       string = !string;
     }
@@ -96,6 +100,7 @@ int main (int argc, const char** argv) {
       line_counter += 1;
       char_counter = 0; space_count = 0;
       second = false; if_line = false; else_line = false; seen_char = false;
+      record = false;
     }
     if (char_counter > 80 && !second) {
       print_error((char*) "More than 80 characters", '!', 0);
@@ -122,7 +127,13 @@ int main (int argc, const char** argv) {
     || cur_char == '&' || (cur_char == '!' && next_char == '=')
     || (cur_char == '~' && next_char == '-'))) {
       char temp_prev = prev_char;
-
+      if (cur_char == '~' && next_char == '-' && !isdigit(c)) {
+        prev_char = c;
+        cur_char = fgetc(infile);
+        next_char = fgetc(infile);
+        c = fgetc(infile);
+        char_counter += 3;;
+      }
       // check if we need to advance by one
       if (next_char == ':' || next_char == '=' ||
       next_char == '>' || next_char == '*' || next_char == '.' || next_char == '|' || next_char == '&' || next_char == '-') {
@@ -137,7 +148,8 @@ int main (int argc, const char** argv) {
           seen_bar = true;
         }
       }
-      if ((next_char != ' ' && next_char != '\n') || temp_prev != ' ') {
+      if ((next_char != ' ' && next_char != '\n') || (temp_prev != ' '
+          && !record)) {
         buffer[25] = '\0';
         print_error((char*) strcat(buffer, chr), cur_char, 0);
 
@@ -182,11 +194,17 @@ int main (int argc, const char** argv) {
         char temp1_c = fgetc(infile);
         if (temp_c  == 'e' && temp1_c == ' ') {
           else_line = true;
-          if (char_counter != if_count) {
+          if (char_counter != if_count && if_count != -1) {
             print_error((char*) "Mis-aligned els", 'e', 0);
           }
         }
         ungetc(temp1_c, infile); ungetc(temp_c, infile);
+        char temp2_c = fgetc(infile);
+        char temp3_c = fgetc(infile);
+        if (temp2_c != 'i' && temp3_c != 'f') {
+          if_count = -1; // don't throw errors on nested else's
+        }
+        ungetc(temp3_c, infile); ungetc(temp2_c, infile);
     }
     if (!string && !comment && then_check && !if_line && !else_line &&
       (prev_char == '\n' || prev_char == ' ') && cur_char == 't'
